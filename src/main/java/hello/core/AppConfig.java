@@ -11,28 +11,39 @@ import hello.core.order.OrderServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// 스프링 기반으로 변경
-@Configuration //AppConfig에 설정을 구성한다는 뜻의 @Configuration
+/*AppConfig@CGLIB 예상 코드
+@Bean
+public MemberRepository memberRepository() {
+
+ if (memoryMemberRepository가 이미 스프링 컨테이너에 등록되어 있으면?) {
+ return 스프링 컨테이너에서 찾아서 반환;
+ } else { //스프링 컨테이너에 없으면 기존 로직을 호출해서 MemoryMemberRepository를 생성하고 스프링 컨테이너에 등록
+ return 반환
+ }
+}*/
+// @Configuration 사용 시, 스프링이 CGLIB라는 바이트코드 조작 라이브러리를 사용해서 AppConfig 클래스를 상속받은 임의의 다른 클래스를 만들고,
+// 그 다른 클래스를 스프링 빈으로 등록
+// @Bean만 사용해도 스프링 빈으로 등록되지만, 싱글톤을 보장하지 않는다. => @Configuration 사용(스프링 설정 정보는 항상 @Configuration 을 사용)
+@Configuration
 public class AppConfig {
-    /*
-    * 스프링 컨테이너는 @Configuration 이 붙은 AppConfig 를 설정(구성) 정보로 사용한다.
-    * 여기서 @Bean 이라 적힌 메서드를 모두 호출해서 반환된 객체를 스프링 컨테이너에 등록한다.
-    * 이렇게 스프링 컨테이너에 등록된 객체를 스프링 빈이라 한다.*/
-    @Bean //스프링 컨테이너에 스프링 빈으로 등록
-    public MemberService memberService() { // 스프링 빈은 @Bean 이 붙은 메서드의 명을 스프링 빈의 이름으로 사용한다. ( memberService ,orderService )
+
+    @Bean
+    public MemberService memberService() {
+        //1번
+        System.out.println("call AppConfig.memberService");
         return new MemberServiceImpl(memberRepository());
     }
 
-    /* 빈의 이름을 직접 등록하는 방법 =>
-    @Bean(name="memberService2")
-    주의: 빈 이름은 항상 다른 이름을 부여해야 한다. 같은 이름을 부여하면, 다른 빈이 무시되거나,
-    기존 빈을 덮어버리거나 설정에 따라 오류가 발생한다.*/
     @Bean
     public OrderService orderService() {
+        //1번
+        System.out.println("call AppConfig.orderService");
         return new OrderServiceImpl(memberRepository(), discountPolicy());
     }
     @Bean
     public MemberRepository memberRepository() {
+        //2번 3번?
+        System.out.println("call AppConfig.memberRepository");
         return new MemoryMemberRepository();
     }
     @Bean
