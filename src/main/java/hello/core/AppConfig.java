@@ -22,6 +22,11 @@ public class AppConfig {
     public MemberService memberService() { // 스프링 빈은 @Bean 이 붙은 메서드의 명을 스프링 빈의 이름으로 사용한다. ( memberService ,orderService )
         return new MemberServiceImpl(memberRepository());
     }
+
+    /* 빈의 이름을 직접 등록하는 방법 =>
+    @Bean(name="memberService2")
+    주의: 빈 이름은 항상 다른 이름을 부여해야 한다. 같은 이름을 부여하면, 다른 빈이 무시되거나,
+    기존 빈을 덮어버리거나 설정에 따라 오류가 발생한다.*/
     @Bean
     public OrderService orderService() {
         return new OrderServiceImpl(memberRepository(), discountPolicy());
