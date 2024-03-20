@@ -2,9 +2,9 @@ package hello.core.scope;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Scope;
 
@@ -37,34 +37,25 @@ public class SingletonWithPrototypeTest1 {
 
         ClientBean clientBean2 = ac.getBean(ClientBean.class);
         int count2 = clientBean2.logic();
-        assertThat(count2).isEqualTo(2);
-
-        //ClientBean이 생성될 때, prototypeBean을 주입받고 내부에 보관하여,
-        //ClientBean 안에 있는 prototypeBean은 "prototype scope"일지라도 같은 객체이다.
-        //"prototype bean"은 사용할 때 마다 새로 생성해서 쓰길 원해서 만드는 것인데, 싱글톤 빈과 함께 계속 유지되는 것이 문제이다.
-        // 문제 해결방법은 다음 commit에서 다룬다.
-
-        /* 참고
-        * 여러개의 빈에서 같은 프로토타입 빈을 주입 받으면,
-        *   "주입받는 시점"에서는 여러개의 프로토타입 빈이 생성된다.
-        *   "사용하는 시점"에서는 특정 싱글톤 빈 내부에 보관(한 번 주입받은)된 객체를 사용한다(같다)
-        * */
+        assertThat(count2).isEqualTo(1); // 서로 다른 객체가 됨.
 
     }
 
-    @Scope("singleton") // 안 써도 되지만 눈에 보이라고 적음
+    @Scope("singleton")
     static class ClientBean {
-        private final PrototypeBean prototypeBean;
-
-        @Autowired // 생성자 한 개라 안써도 되지만 눈에 보이라고 적음
-        public ClientBean(PrototypeBean prototypeBean) { //@RequiredArgsConstructor 로 처리해도 되지만 눈에 보이라고 적음
-            this.prototypeBean = prototypeBean;
-        }
-
+        @Autowired
+        private ApplicationContext ac;
         public int logic() {
+            PrototypeBean prototypeBean = ac.getBean(PrototypeBean.class); // 문제 해결방법은 호출마다 프로토타입 빈을 새로생성하면 된다.
             prototypeBean.addCount();
-            return prototypeBean.getCount();
+            int count = prototypeBean.getCount();
+            return count;
         }
+        /*
+        * 실행해보면 ac.getBean() 을 통해서 항상 새로운 프로토타입 빈이 생성되는 것을 확인할 수 있다.
+        의존관계를 외부에서 주입(DI) 받는게 아니라 이렇게 직접 필요한 의존관계를 찾는 것을 Dependency Lookup (DL) 의존관계 조회(탐색) 이라한다.
+        그런데 이렇게 스프링의 애플리케이션 컨텍스트 전체를 주입받게 되면, 스프링 컨테이너에 종속적인 코드가 되고, 단위 테스트도 어려워진다.
+        지금 필요한 기능은 지정한 프로토타입 빈을 컨테이너에서 대신 찾아주는 딱! DL 정도의 기능만 제공하는 무언가가 있으면 된다. => ObjectFactory, ObjectProvider*/
     }
 
     @Scope("prototype")
