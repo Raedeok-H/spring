@@ -14,6 +14,7 @@
             그래서 "@PreDestroy" 같은 종료 메서드가 호출되지 않는다.
 
 3.웹 관련 스코프
-    request: 웹 요청이 들어오고 나갈때 까지 유지되는 스코프이다.
-    session: 웹 세션이 생성되고 종료될 때 까지 유지되는 스코프이다.
-    application: 웹의 서블릿 컨텍스트와 같은 범위로 유지되는 스코프이다.
+    request: HTTP 요청 하나가 들어오고 나갈 때 까지 유지되는 스코프, 각각의 HTTP 요청마다 별도의 빈 인스턴스가 생성되고, 관리된다.
+    session: HTTP Session과 동일한 생명주기를 가지는 스코프
+    application: 서블릿 컨텍스트( ServletContext )와 동일한 생명주기를 가지는 스코프
+    websocket: 웹 소켓과 동일한 생명주기를 가지는 스코프
