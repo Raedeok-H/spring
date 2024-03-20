@@ -3,8 +3,8 @@ package hello.core.scope;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Scope;
 
@@ -37,25 +37,25 @@ public class SingletonWithPrototypeTest1 {
 
         ClientBean clientBean2 = ac.getBean(ClientBean.class);
         int count2 = clientBean2.logic();
-        assertThat(count2).isEqualTo(1); // 서로 다른 객체가 됨.
-
+        assertThat(count2).isEqualTo(1); //ObjectProvider 사용으로 다른 객체가 된다
     }
 
     @Scope("singleton")
     static class ClientBean {
         @Autowired
-        private ApplicationContext ac;
+        private ObjectProvider<PrototypeBean> prototypeBeanProvider; //테스트니까 간단하게 필드주입으로 함
+        //ObjectProvider 사용, ObjectFactory 로 바꾸어도 동작함(ObjectProvider가 ObjectFactory를 상속받았기 때문)
+                            // ObjectFactory에는 getObject()메소드만 있고 ObjectProvider는 편의 기능(옵션,스트림처리) 을 더 제공
+                            // ObjectProvider는 "스프링에 의존"
+
         public int logic() {
-            PrototypeBean prototypeBean = ac.getBean(PrototypeBean.class); // 문제 해결방법은 호출마다 프로토타입 빈을 새로생성하면 된다.
+            PrototypeBean prototypeBean = prototypeBeanProvider.getObject(); // 얘가 찾아줌 -> getObject()를 호출할 때, 스프링 컨테이너에서 프로토타입 빈을 찾아서 반환함
+                                                                             // 직접 찾는것이 아니라 찾아주는 기능만 제공
+                                                                             // 스프링이 제공하는 기능을 사용하지만, 기능이 단순하므로 단위테스트를 만들거나 mock 코드를 만들기는 훨씬쉬워진다.
+                                                                             // ObjectProvider 는 지금 딱 필요한 DL 정도의 기능만 제공한다.
             prototypeBean.addCount();
-            int count = prototypeBean.getCount();
-            return count;
+            return prototypeBean.getCount();
         }
-        /*
-        * 실행해보면 ac.getBean() 을 통해서 항상 새로운 프로토타입 빈이 생성되는 것을 확인할 수 있다.
-        의존관계를 외부에서 주입(DI) 받는게 아니라 이렇게 직접 필요한 의존관계를 찾는 것을 Dependency Lookup (DL) 의존관계 조회(탐색) 이라한다.
-        그런데 이렇게 스프링의 애플리케이션 컨텍스트 전체를 주입받게 되면, 스프링 컨테이너에 종속적인 코드가 되고, 단위 테스트도 어려워진다.
-        지금 필요한 기능은 지정한 프로토타입 빈을 컨테이너에서 대신 찾아주는 딱! DL 정도의 기능만 제공하는 무언가가 있으면 된다. => ObjectFactory, ObjectProvider*/
     }
 
     @Scope("prototype")
