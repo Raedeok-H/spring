@@ -30,8 +30,7 @@ public class ComponentFilterAppConfigTest {
     //excludeFilters : 컴포넌트 스캔에서 제외할 대상을 지정한다.
     @ComponentScan(
             includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes =MyIncludeComponent.class),
-            excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, classes =MyExcludeComponent.class),
-                            @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = BeanA.class)}
+            excludeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes =MyExcludeComponent.class)
     ) //@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = BeanA.class) 처럼 추가하면 BeanA도 제외할 수 있다.
     static class ComponentFilterAppConfig {
     }

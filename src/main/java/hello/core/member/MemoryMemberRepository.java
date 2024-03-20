@@ -1,4 +1,5 @@
 package hello.core.member;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

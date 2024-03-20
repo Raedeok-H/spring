@@ -35,9 +35,9 @@ public class AutoAppConfig {
     * Consider renaming one of the beans or enabling overriding by setting
     * spring.main.allow-bean-definition-overriding=true
     **/
-    @Bean(name = "memoryMemberRepository")
+    /*@Bean(name = "memoryMemberRepository")
     public MemberRepository memberRepository() {
         return new MemoryMemberRepository();
-    }
+    }*/
 
 }
